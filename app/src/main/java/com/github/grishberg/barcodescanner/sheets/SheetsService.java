@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.github.grishberg.barcodescanner.R;
 import com.github.grishberg.barcodescanner.common.AbsServiceObservable;
 import com.github.grishberg.barcodescanner.common.Logger;
+import com.github.grishberg.barcodescanner.form.CellRelation;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,7 +18,6 @@ import java.util.Locale;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -34,6 +34,7 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
     private static final String TAG = SheetsService.class.getSimpleName();
     private final Logger logger;
     private final Context appContext;
+    private File docFile;
 
     @Inject
     public SheetsService(Logger logger, Context appContext) {
@@ -41,22 +42,26 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
         this.appContext = appContext;
     }
 
-    public void findSheetsCell(final String key) {
-        new AsyncTask<Void, Void, ArrayList<FoundCellResult>>() {
+    public void setDocFileName(String fileName) {
+        docFile = new File(fileName);
+    }
+
+    public void findSheetsCell(final SheetsColumnRequest request) {
+        new AsyncTask<Void, Void, ArrayList<CellRelation>>() {
             @Override
-            protected ArrayList<FoundCellResult> doInBackground(Void... voids) {
-                return findResults(key);
+            protected ArrayList<CellRelation> doInBackground(Void... voids) {
+                return findResults(request);
             }
 
             @Override
-            protected void onPostExecute(ArrayList<FoundCellResult> result) {
+            protected void onPostExecute(ArrayList<CellRelation> result) {
                 notifyResultFound(result);
             }
         }.execute();
     }
 
-    private ArrayList<FoundCellResult> findResults(String key) {
-        ArrayList<FoundCellResult> results = new ArrayList<>();
+    private ArrayList<CellRelation> findResults(SheetsColumnRequest request) {
+        ArrayList<CellRelation> results = new ArrayList<>();
 
         InputStream stream = appContext.getResources().openRawResource(R.raw.ean13_sample);
         try {
@@ -66,16 +71,32 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
             FormulaEvaluator formulaEvaluator = workbook.getCreationHelper()
                     .createFormulaEvaluator();
             logger.d(TAG, "findResults: rowsCount = " + rowsCount);
-            for (int r = 0; r < rowsCount; r++) {
-                Row row = sheet.getRow(r);
-                int cellsCount = row.getPhysicalNumberOfCells();
-                for (int c = 0; c < cellsCount; c++) {
-                    String value = getCellAsString(row, c, formulaEvaluator);
-                    String cellInfo = "r:" + r + "; c:" + c + "; v:" + value;
+
+            int[] searchRows = {2, 3};
+            Row firstRow = sheet.getRow(searchRows[0]);
+            int cellsCount = firstRow.getPhysicalNumberOfCells();
+            for (int y = 0; y < cellsCount; y++) {
+                boolean found = false;
+                Row row = sheet.getRow(y);
+                for (int i = 0; i < searchRows.length; i++) {
+                    int x = searchRows[i];
+                    String value = getCellAsString(row, x, formulaEvaluator);
+                    String cellInfo = "x:" + x + "; y:" + y + "; v:" + value;
+
                     logger.d(TAG, cellInfo);
-                    if (key.equals(value)) {
+                    if (request.getSearchString().equals(value)) {
+                        found = true;
                         logger.d(TAG, "------- found cell in : " + cellInfo);
-                        results.add(new FoundCellResult(r, c));
+                        break;
+                    }
+                }
+                if (found) {
+                    for (CellRelation representation : request.getCellRepresentations()) {
+                        int rowIndexFromRelation = representation.getX();
+
+                        CellRelation resultRelation = new CellRelation(representation);
+                        resultRelation.setValue(getCellAsString(row, rowIndexFromRelation, formulaEvaluator));
+                        results.add(resultRelation);
                     }
                 }
             }
@@ -87,7 +108,7 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
         return results;
     }
 
-    private void notifyResultFound(ArrayList<FoundCellResult> result) {
+    private void notifyResultFound(ArrayList<CellRelation> result) {
         for (SheetsServiceListener listener : listeners) {
             listener.onFoundSheetsCell(result);
         }

@@ -3,4 +3,20 @@
     <string name="open_camera_text">Open camera</string>
     <string name="file_chooser_title">Open xls/xlsx file</string>
     <string name="file_chooser_text">Open xls file</string>
+    <string name="add_relation_cell_address_title">Add cell relations</string>
+    <string name="enter_cell_address">Cell address</string>
+    <string name="add_relation_readonly">readonly</string>
+    <string name="add_relation_button_text">Add relation</string>
+    <string name="add_relation_negative_button_text">Chancel</string>
+
+    <string name="flash_on">Flash [ON]</string>
+    <string name="flash_off">Flash [OFF]</string>
+    <string name="auto_focus_on">Auto Focus [ON]</string>
+    <string name="auto_focus_off">Auto Focus [OFF]</string>
+    <string name="formats">Formats</string>
+    <string name="choose_formats">Choose Formats</string>
+    <string name="ok_button">Ok</string>
+    <string name="cancel_button">Chancel</string>
+    <string name="preference_last_doc_key">com.github.grishberg.LastDocKey</string>
+    <string name="cell_readonly">Readonly</string>
 </resources>

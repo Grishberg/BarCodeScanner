@@ -9,5 +9,7 @@ public interface MainServiceStateChangeListener {
 
     void onOpenFileChooser();
 
-    void onFoundDocumentCellByAddress(String cellAddress);
+    void onShowMainScreen();
+
+    void onShowAddRelationsScreen();
 }

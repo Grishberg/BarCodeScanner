@@ -1,5 +1,7 @@
 package com.github.grishberg.barcodescanner.sheets;
 
+import com.github.grishberg.barcodescanner.form.CellRelation;
+
 import java.util.List;
 
 /**
@@ -12,5 +14,5 @@ public interface SheetsServiceListener {
      *
      * @param result
      */
-    void onFoundSheetsCell(List<FoundCellResult> result);
+    void onFoundSheetsCell(List<CellRelation> result);
 }

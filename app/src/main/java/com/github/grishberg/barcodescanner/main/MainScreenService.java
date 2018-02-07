@@ -4,10 +4,15 @@ import com.github.grishberg.barcodescanner.common.AbsServiceObservable;
 import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.common.ObservableValue;
 import com.github.grishberg.barcodescanner.common.ValueObserver;
-import com.github.grishberg.barcodescanner.sheets.FoundCellResult;
+import com.github.grishberg.barcodescanner.form.CellRelation;
+import com.github.grishberg.barcodescanner.form.CellRelationRepository;
+import com.github.grishberg.barcodescanner.form.FormCellType;
+import com.github.grishberg.barcodescanner.sheets.LastDocumentProvider;
+import com.github.grishberg.barcodescanner.sheets.SheetsColumnRequest;
 import com.github.grishberg.barcodescanner.sheets.SheetsService;
 import com.github.grishberg.barcodescanner.sheets.SheetsServiceListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -19,29 +24,67 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
     private static final String TAG = MainScreenService.class.getSimpleName();
     private final Logger logger;
     private ObservableValue<String> barCode = new ObservableValue<>();
+    private ObservableValue<List<CellRelation>> resultCells = new ObservableValue<>();
     private final SheetsService sheetsService;
+    private final LastDocumentProvider lastDocumentProvider;
+    private final CellRelationRepository cellRelationStorage;
+    private List<CellRelation> cellsRelations;
 
     @Inject
-    public MainScreenService(Logger logger, SheetsService sheetsService) {
+    public MainScreenService(Logger logger,
+                             SheetsService sheetsService,
+                             LastDocumentProvider lastDocumentProvider,
+                             CellRelationRepository cellRelationStorage) {
         this.logger = logger;
         this.sheetsService = sheetsService;
+        this.lastDocumentProvider = lastDocumentProvider;
+        this.cellRelationStorage = cellRelationStorage;
         sheetsService.registerListener(this);
+        checkLastOpenedDoc();
     }
 
-    public void showBarCodeScanner() {
+    private void checkLastOpenedDoc() {
+        String lastDoc = lastDocumentProvider.getLastDocument();
+        if (lastDoc == null) {
+            showOpenFileDialog();
+            return;
+        }
+        sheetsService.setDocFileName(lastDoc);
+        cellRelationStorage.findRepresentation(lastDoc, new CellRelationRepository.OnRepresentationLoadedListener() {
+            @Override
+            public void onRepresentationLoaded(List<CellRelation> relations) {
+                cellsRelations = relations;
+            }
+
+            @Override
+            public void onRepresentationNotFound() {
+                showAddRelationsScreen();
+            }
+        });
+    }
+
+    private void showAddRelationsScreen() {
         for (MainServiceStateChangeListener listener : listeners) {
-            listener.onShowBarCodeScanner();
+            listener.onShowAddRelationsScreen();
         }
     }
 
     public void processBarCode(String code) {
         logger.d(TAG, "processBarCode: " + code);
         barCode.changeValue(code);
-        sheetsService.findSheetsCell(code);
+        sheetsService.findSheetsCell(new SheetsColumnRequest(code, cellsRelations));
+        notifyShowResultScreen();
     }
 
-    private void processFoundResult(FoundCellResult result) {
+    private void notifyShowResultScreen() {
+        for (MainServiceStateChangeListener listener : listeners) {
+            listener.onShowMainScreen();
+        }
+    }
 
+    public void openExcelDocument(String path) {
+        sheetsService.setDocFileName(path);
+        lastDocumentProvider.updateLastDocument(path);
     }
 
     public void registerBarcodeObserver(ValueObserver<String> observer) {
@@ -52,6 +95,14 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
         barCode.unregisterObserver(observer);
     }
 
+    public void registerResultCellsObserver(ValueObserver<List<CellRelation>> observer) {
+        resultCells.registerObserver(observer);
+    }
+
+    public void unregisterResultCellsObserver(ValueObserver<List<CellRelation>> observer) {
+        resultCells.unregisterObserver(observer);
+    }
+
     public void showOpenFileDialog() {
         logger.d(TAG, "showOpenFileDialog");
         for (MainServiceStateChangeListener listener : listeners) {
@@ -60,14 +111,7 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
     }
 
     @Override
-    public void onFoundSheetsCell(List<FoundCellResult> result) {
-        StringBuilder sb = new StringBuilder();
-        for (FoundCellResult res : result) {
-            sb.append(res.toString());
-            sb.append("; ");
-        }
-        for (MainServiceStateChangeListener listener : listeners) {
-            listener.onFoundDocumentCellByAddress(sb.toString());
-        }
+    public void onFoundSheetsCell(List<CellRelation> result) {
+        resultCells.changeValue(result);
     }
 }

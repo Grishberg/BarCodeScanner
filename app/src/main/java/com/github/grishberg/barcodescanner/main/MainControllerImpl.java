@@ -2,6 +2,9 @@ package com.github.grishberg.barcodescanner.main;
 
 import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.common.ValueObserver;
+import com.github.grishberg.barcodescanner.form.CellRelation;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -21,6 +24,17 @@ public class MainControllerImpl implements MainController {
     }
 
     @Override
+    public void onOpenFileButtonClicked() {
+        logger.d(TAG, "onOpenFileButtonClicked");
+        service.showOpenFileDialog();
+    }
+
+    @Override
+    public void openDocument(String path) {
+        service.openExcelDocument(path);
+    }
+
+    @Override
     public void registerListener(MainServiceStateChangeListener listener) {
         service.registerListener(listener);
     }
@@ -31,18 +45,6 @@ public class MainControllerImpl implements MainController {
     }
 
     @Override
-    public void onScannerButtonClicked() {
-        logger.d(TAG, "onScannerButtonClicked");
-        service.showBarCodeScanner();
-    }
-
-    @Override
-    public void onOpenFileButtonClicked() {
-        logger.d(TAG, "onOpenFileButtonClicked");
-        service.showOpenFileDialog();
-    }
-
-    @Override
     public void registerBarcodeObserver(ValueObserver<String> observer) {
         service.registerBarcodeObserver(observer);
     }
@@ -50,5 +52,15 @@ public class MainControllerImpl implements MainController {
     @Override
     public void unregisterBarcodeObserver(ValueObserver<String> observer) {
         service.unregisterBarcodeObserver(observer);
+    }
+
+    @Override
+    public void registerResultCellsObserver(ValueObserver<List<CellRelation>> observer) {
+        service.registerResultCellsObserver(observer);
+    }
+
+    @Override
+    public void unregisterResultCellsObserver(ValueObserver<List<CellRelation>> observer) {
+        service.unregisterResultCellsObserver(observer);
     }
 }
