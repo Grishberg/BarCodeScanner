@@ -12,22 +12,35 @@ import java.util.List;
 public class CellRelationRepositoryImpl implements CellRelationRepository {
     private static final String TAG = CellRelationRepositoryImpl.class.getSimpleName();
     private final Logger logger;
-    private final ArrayList<Object> cellsRelations;
+    private String currentFilePath;
+    private final ArrayList<CellRelation> currentRelation = new ArrayList<>();
 
     public CellRelationRepositoryImpl(Logger logger) {
         this.logger = logger;
-        cellsRelations = new ArrayList<>();
-        cellsRelations.add(new CellRelation(FormCellType.STRING, true, 0));
-        cellsRelations.add(new CellRelation(FormCellType.NUMBER, true, 4));
+        currentRelation.add(new CellRelation(FormCellType.STRING, true, 0));
+        currentRelation.add(new CellRelation(FormCellType.NUMBER, true, 4));
     }
 
     @Override
     public void findRepresentation(String filePath, OnRepresentationLoadedListener listener) {
-
+        if (listener != null) {
+            listener.onRepresentationLoaded(currentRelation);
+        }
     }
 
     @Override
-    public void storeRepresentatin(String filePath, List<CellRelation> representations) {
+    public void storeRelations(String filePath, List<CellRelation> relations) {
+        currentRelation.clear();
+        currentRelation.addAll(relations);
+    }
 
+    @Override
+    public void setCurrentDocumentName(String filePath) {
+        currentFilePath = filePath;
+    }
+
+    @Override
+    public void addRelationForCurrentDoc(CellRelation relation) {
+        currentRelation.add(relation);
     }
 }

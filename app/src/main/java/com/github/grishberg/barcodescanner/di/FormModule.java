@@ -33,9 +33,4 @@ public class FormModule {
                                                         LastDocumentProvider lastDocumentProvider) {
         return new FormBuilderService(logger, sheetsService, relationRepository, lastDocumentProvider);
     }
-
-    @Provides
-    public FormBuilderController provideFormBuilderController(FormBuilderService service) {
-        return new FormBuilderControllerImpl(service);
-    }
 }

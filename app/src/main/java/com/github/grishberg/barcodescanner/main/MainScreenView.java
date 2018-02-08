@@ -16,14 +16,13 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.github.grishberg.barcodescanner.R;
-import com.github.grishberg.barcodescanner.barcode.BarCodeScanActivity;
 import com.github.grishberg.barcodescanner.barcode.BarCodeScannerFragment;
 import com.github.grishberg.barcodescanner.di.DiManager;
-import com.github.grishberg.barcodescanner.form.builder.FormBuilderFragment;
+import com.github.grishberg.barcodescanner.form.builder.FormBuilderFragmentView;
 import com.github.grishberg.barcodescanner.form.FoundResultFragment;
 
-public class MainActivity extends AppCompatActivity implements MainServiceStateChangeListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class MainScreenView extends AppCompatActivity implements MainServiceStateChangeListener {
+    private static final String TAG = MainScreenView.class.getSimpleName();
     private static final int FILE_CHOOSER_REQUEST_CODE = 123;
     private static final int NUM_PAGES = 3;
     public static final int CAMERA_REQUEST_CODE = 1;
@@ -32,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements MainServiceStateC
     public static final int ADD_RELATIONS_SCREEN = 2;
 
     private MainController mainController;
+    private MainScreenService service;
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -41,21 +41,25 @@ public class MainActivity extends AppCompatActivity implements MainServiceStateC
         Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mainController = DiManager.getAppComponent().provideMainController();
+        service = DiManager.getAppComponent().provideMainScreenService();
+        mainController = new MainControllerImpl(this, service, DiManager.getAppComponent()
+                .provideLogger());
 
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
 
-        mainController.registerListener(this);
+        service.registerListener(this);
+
         checkPermission();
+        mainController.onCreated();
     }
 
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
-        mainController.unregisterListener(this);
+        service.unregisterListener(this);
     }
 
     @Override
@@ -71,14 +75,7 @@ public class MainActivity extends AppCompatActivity implements MainServiceStateC
     }
 
     public static void start(Activity activity) {
-        activity.startActivity(new Intent(activity, MainActivity.class));
-    }
-
-    @Override
-    public void onShowBarCodeScanner() {
-        Log.d(TAG, "onShowBarCodeScanner: ");
-        BarCodeScanActivity.start(this);
-        finish();
+        activity.startActivity(new Intent(activity, MainScreenView.class));
     }
 
     @Override
@@ -98,6 +95,12 @@ public class MainActivity extends AppCompatActivity implements MainServiceStateC
                 && data.getData() != null) {
             mainController.openDocument(data.getData().getPath());
         }
+    }
+
+    @Override
+    public void onShowBarCodeScanner() {
+        Log.d(TAG, "onShowBarCodeScanner: ");
+        viewPager.setCurrentItem(BARCODE_SCREEN);
     }
 
     @Override
@@ -183,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements MainServiceStateC
                 case RESULT_SCREEN:
                     return new FoundResultFragment();
             }
-            return new FormBuilderFragment();
+            return new FormBuilderFragmentView();
         }
 
         @Override

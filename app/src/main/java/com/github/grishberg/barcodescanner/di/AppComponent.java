@@ -1,9 +1,12 @@
 package com.github.grishberg.barcodescanner.di;
 
 import com.github.grishberg.barcodescanner.barcode.BarCodeController;
+import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.form.builder.FormBuilderController;
+import com.github.grishberg.barcodescanner.form.builder.FormBuilderService;
 import com.github.grishberg.barcodescanner.form.dialog.AddRelationController;
 import com.github.grishberg.barcodescanner.main.MainController;
+import com.github.grishberg.barcodescanner.main.MainScreenService;
 
 import javax.inject.Singleton;
 
@@ -18,9 +21,11 @@ import dagger.Component;
 public interface AppComponent {
     BarCodeController provideBarCodeController();
 
-    MainController provideMainController();
-
     AddRelationController provideAddRelationController();
 
-    FormBuilderController provideForBuilderController();
+    FormBuilderService provideFormBuilderService();
+
+    Logger provideLogger();
+
+    MainScreenService provideMainScreenService();
 }

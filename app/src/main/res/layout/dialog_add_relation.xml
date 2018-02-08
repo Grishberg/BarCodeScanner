@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/enter_cell_address"
             android:maxLength="11"
+            android:inputType="number"
             android:textSize="@dimen/add_relation_text_size"/>
 
     </android.support.design.widget.TextInputLayout>

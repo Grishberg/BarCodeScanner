@@ -19,4 +19,12 @@
     <string name="cancel_button">Chancel</string>
     <string name="preference_last_doc_key">com.github.grishberg.LastDocKey</string>
     <string name="cell_readonly">Readonly</string>
+
+    <string name="cell_type_string">String</string>
+    <string name="cell_type_number">Number</string>
+
+    <string-array name="cell_type_array">
+        <item>@string/cell_type_string</item>
+        <item>@string/cell_type_number</item>
+    </string-array>
 </resources>

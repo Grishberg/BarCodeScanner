@@ -35,9 +35,4 @@ public class MainModule {
         return new MainScreenService(logger, sheetsService,
                 lastDocumentProvider, cellRelationRepository);
     }
-
-    @Provides
-    MainController provideMainController(Logger logger, MainScreenService mainScreenService) {
-        return new MainControllerImpl(mainScreenService, logger);
-    }
 }

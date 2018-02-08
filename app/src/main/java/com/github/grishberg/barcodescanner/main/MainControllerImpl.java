@@ -16,9 +16,10 @@ public class MainControllerImpl implements MainController {
     private static final String TAG = MainControllerImpl.class.getSimpleName();
     private final MainScreenService service;
     private final Logger logger;
+    private final MainScreenView view;
 
-    @Inject
-    public MainControllerImpl(MainScreenService service, Logger logger) {
+    public MainControllerImpl(MainScreenView view, MainScreenService service, Logger logger) {
+        this.view = view;
         this.service = service;
         this.logger = logger;
     }
@@ -35,32 +36,7 @@ public class MainControllerImpl implements MainController {
     }
 
     @Override
-    public void registerListener(MainServiceStateChangeListener listener) {
-        service.registerListener(listener);
-    }
-
-    @Override
-    public void unregisterListener(MainServiceStateChangeListener listener) {
-        service.unregisterListener(listener);
-    }
-
-    @Override
-    public void registerBarcodeObserver(ValueObserver<String> observer) {
-        service.registerBarcodeObserver(observer);
-    }
-
-    @Override
-    public void unregisterBarcodeObserver(ValueObserver<String> observer) {
-        service.unregisterBarcodeObserver(observer);
-    }
-
-    @Override
-    public void registerResultCellsObserver(ValueObserver<List<CellRelation>> observer) {
-        service.registerResultCellsObserver(observer);
-    }
-
-    @Override
-    public void unregisterResultCellsObserver(ValueObserver<List<CellRelation>> observer) {
-        service.unregisterResultCellsObserver(observer);
+    public void onCreated() {
+        service.init();
     }
 }

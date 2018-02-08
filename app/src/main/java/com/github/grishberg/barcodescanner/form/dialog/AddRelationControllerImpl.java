@@ -1,17 +1,31 @@
 package com.github.grishberg.barcodescanner.form.dialog;
 
+import com.github.grishberg.barcodescanner.form.builder.FormBuilderService;
+
 /**
  * Created by grishberg on 06.02.18.
  */
 
 public class AddRelationControllerImpl implements AddRelationController {
-    @Override
-    public void onPositiveClicked() {
+    private final FormBuilderService service;
+    private AddRelationDialogView view;
 
+    public AddRelationControllerImpl(FormBuilderService service) {
+        this.service = service;
+    }
+
+    @Override
+    public void setView(AddRelationDialogView addRelationDialogView) {
+        view = addRelationDialogView;
+    }
+
+    @Override
+    public void onPositiveClicked(int cellColumnIndex, boolean checked, int typeIndex) {
+        service.addRelation(cellColumnIndex, checked, typeIndex);
     }
 
     @Override
     public void onNegativeClicked() {
-
+        view.dismissDialog();
     }
 }

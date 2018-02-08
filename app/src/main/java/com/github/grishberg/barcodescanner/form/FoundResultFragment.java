@@ -10,9 +10,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.github.grishberg.barcodescanner.R;
+import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.common.ValueObserver;
 import com.github.grishberg.barcodescanner.di.DiManager;
-import com.github.grishberg.barcodescanner.main.MainController;
+import com.github.grishberg.barcodescanner.main.MainControllerImpl;
+import com.github.grishberg.barcodescanner.main.MainScreenService;
 
 import java.util.List;
 
@@ -22,9 +24,11 @@ import java.util.List;
 
 public class FoundResultFragment extends Fragment {
     private static final String TAG = FoundResultFragment.class.getSimpleName();
-    private MainController mainController;
+    private MainScreenService service;
+    private FoundResultController controller;
     private TextView barCodeText;
     private TextView documentResult;
+    private Logger logger;
 
     private final ValueObserver<String> barCodeObserver = new ValueObserver<String>() {
         @Override
@@ -58,15 +62,17 @@ public class FoundResultFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainController = DiManager.getAppComponent().provideMainController();
-        mainController.registerBarcodeObserver(barCodeObserver);
-        mainController.registerResultCellsObserver(resultObserver);
+        logger = DiManager.getAppComponent().provideLogger();
+        service = DiManager.getAppComponent().provideMainScreenService();
+        controller = new FoundResultControllerImpl(this, service, logger);
+        service.registerBarcodeObserver(barCodeObserver);
+        service.registerResultCellsObserver(resultObserver);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mainController.unregisterBarcodeObserver(barCodeObserver);
-        mainController.unregisterResultCellsObserver(resultObserver);
+        service.unregisterBarcodeObserver(barCodeObserver);
+        service.unregisterResultCellsObserver(resultObserver);
     }
 }

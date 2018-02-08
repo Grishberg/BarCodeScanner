@@ -40,6 +40,9 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
         this.lastDocumentProvider = lastDocumentProvider;
         this.cellRelationStorage = cellRelationStorage;
         sheetsService.registerListener(this);
+    }
+
+    public void init() {
         checkLastOpenedDoc();
     }
 
@@ -50,17 +53,7 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
             return;
         }
         sheetsService.setDocFileName(lastDoc);
-        cellRelationStorage.findRepresentation(lastDoc, new CellRelationRepository.OnRepresentationLoadedListener() {
-            @Override
-            public void onRepresentationLoaded(List<CellRelation> relations) {
-                cellsRelations = relations;
-            }
-
-            @Override
-            public void onRepresentationNotFound() {
-                showAddRelationsScreen();
-            }
-        });
+        checkForRelationsAndOpenNextScreen(lastDoc);
     }
 
     private void showAddRelationsScreen() {
@@ -85,6 +78,42 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
     public void openExcelDocument(String path) {
         sheetsService.setDocFileName(path);
         lastDocumentProvider.updateLastDocument(path);
+
+        checkForRelationsAndOpenNextScreen(path);
+    }
+
+    private void checkForRelationsAndOpenNextScreen(String path) {
+        cellRelationStorage.findRepresentation(path, new CellRelationRepository.OnRepresentationLoadedListener() {
+            @Override
+            public void onRepresentationLoaded(List<CellRelation> relations) {
+                cellsRelations = relations;
+                showBarcodeScreen();
+            }
+
+            @Override
+            public void onRepresentationNotFound() {
+                showAddRelationsScreen();
+            }
+        });
+    }
+
+    private void showBarcodeScreen() {
+        logger.d(TAG, "showBarcodeScreen");
+        for (MainServiceStateChangeListener listener : listeners) {
+            listener.onShowBarCodeScanner();
+        }
+    }
+
+    public void showOpenFileDialog() {
+        logger.d(TAG, "showOpenFileDialog");
+        for (MainServiceStateChangeListener listener : listeners) {
+            listener.onOpenFileChooser();
+        }
+    }
+
+    @Override
+    public void onFoundSheetsCell(List<CellRelation> result) {
+        resultCells.changeValue(result);
     }
 
     public void registerBarcodeObserver(ValueObserver<String> observer) {
@@ -101,17 +130,5 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
 
     public void unregisterResultCellsObserver(ValueObserver<List<CellRelation>> observer) {
         resultCells.unregisterObserver(observer);
-    }
-
-    public void showOpenFileDialog() {
-        logger.d(TAG, "showOpenFileDialog");
-        for (MainServiceStateChangeListener listener : listeners) {
-            listener.onOpenFileChooser();
-        }
-    }
-
-    @Override
-    public void onFoundSheetsCell(List<CellRelation> result) {
-        resultCells.changeValue(result);
     }
 }

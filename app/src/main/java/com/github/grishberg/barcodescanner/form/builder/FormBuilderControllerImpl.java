@@ -1,17 +1,16 @@
 package com.github.grishberg.barcodescanner.form.builder;
 
-import javax.inject.Inject;
-
 /**
  * Created by grishberg on 07.02.18.
  */
 
 public class FormBuilderControllerImpl implements FormBuilderController {
+    private FormBuilderFragmentView view;
     private final FormBuilderService service;
 
-    @Inject
-    public FormBuilderControllerImpl(FormBuilderService service) {
+    public FormBuilderControllerImpl(FormBuilderFragmentView formBuilderFragmentView, FormBuilderService service) {
         this.service = service;
+        this.view = formBuilderFragmentView;
     }
 
     @Override
@@ -21,16 +20,6 @@ public class FormBuilderControllerImpl implements FormBuilderController {
 
     @Override
     public void onAddRelationButtonClicked() {
-        service.onAddRelationButtonClicked();
-    }
-
-    @Override
-    public void registerFormBuilderListener(FormBuilderModelListener listener) {
-        service.setListener(listener);
-    }
-
-    @Override
-    public void unregisterFormBuilderListener(FormBuilderModelListener listener) {
-        service.setListener(null);
+        view.onShowAddRelationDialog();
     }
 }

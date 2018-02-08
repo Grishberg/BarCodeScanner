@@ -5,11 +5,8 @@ package com.github.grishberg.barcodescanner.form.builder;
  */
 
 public interface FormBuilderController {
+
     void onFormCreated();
 
     void onAddRelationButtonClicked();
-
-    void registerFormBuilderListener(FormBuilderModelListener listener);
-
-    void unregisterFormBuilderListener(FormBuilderModelListener listener);
 }

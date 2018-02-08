@@ -3,6 +3,7 @@ package com.github.grishberg.barcodescanner.form.builder;
 import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.form.CellRelation;
 import com.github.grishberg.barcodescanner.form.CellRelationRepository;
+import com.github.grishberg.barcodescanner.form.FormCellType;
 import com.github.grishberg.barcodescanner.sheets.LastDocumentProvider;
 import com.github.grishberg.barcodescanner.sheets.SheetsService;
 
@@ -61,13 +62,18 @@ public class FormBuilderService {
         }
     }
 
-    public void setListener(FormBuilderModelListener listener) {
+    public void registerFormBuilderServiceListener(FormBuilderModelListener listener) {
         this.listener = listener;
     }
 
-    public void onAddRelationButtonClicked() {
-        if(listener != null) {
-            listener.onShowAddRelationDialog();
-        }
+    public void unregisterFormBuilderServiceListener(FormBuilderModelListener listener) {
+        this.listener = null;
+    }
+
+    public void addRelation(int cellColumnIndex, boolean readonly, int typeIndex) {
+        FormCellType cellType = FormCellType.values()[typeIndex];
+        CellRelation relation = new CellRelation(cellType, readonly, cellColumnIndex);
+        relationRepository.addRelationForCurrentDoc(relation);
+        requestRelations();
     }
 }
