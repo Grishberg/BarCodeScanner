@@ -1,10 +1,9 @@
 package com.github.grishberg.barcodescanner.di;
 
 import com.github.grishberg.barcodescanner.common.Logger;
+import com.github.grishberg.barcodescanner.form.CellRelationDao;
 import com.github.grishberg.barcodescanner.form.CellRelationRepository;
 import com.github.grishberg.barcodescanner.form.CellRelationRepositoryImpl;
-import com.github.grishberg.barcodescanner.form.builder.FormBuilderController;
-import com.github.grishberg.barcodescanner.form.builder.FormBuilderControllerImpl;
 import com.github.grishberg.barcodescanner.form.builder.FormBuilderService;
 import com.github.grishberg.barcodescanner.sheets.LastDocumentProvider;
 import com.github.grishberg.barcodescanner.sheets.SheetsService;
@@ -21,8 +20,9 @@ import dagger.Provides;
 public class FormModule {
     @Singleton
     @Provides
-    CellRelationRepository provideCellRelationRepository(Logger logger) {
-        return new CellRelationRepositoryImpl(logger);
+    CellRelationRepository provideCellRelationRepository(Logger logger,
+                                                         CellRelationDao cellRelationDao) {
+        return new CellRelationRepositoryImpl(logger, cellRelationDao);
     }
 
     @Singleton

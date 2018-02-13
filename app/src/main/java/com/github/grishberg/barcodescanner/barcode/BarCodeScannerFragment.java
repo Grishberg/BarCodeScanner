@@ -66,6 +66,7 @@ public class BarCodeScannerFragment extends Fragment implements
 
     @Override
     public void onCreate(Bundle state) {
+        Log.d(TAG, "onCreate: ");
         super.onCreate(state);
         setHasOptionsMenu(true);
         controller = DiManager.getAppComponent().provideBarCodeController();
@@ -127,6 +128,7 @@ public class BarCodeScannerFragment extends Fragment implements
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume: ");
         super.onResume();
         mScannerView.setResultHandler(this);
         mScannerView.startCamera(mCameraId);
@@ -145,22 +147,15 @@ public class BarCodeScannerFragment extends Fragment implements
 
     @Override
     public void handleResult(Result rawResult) {
+        Log.d(TAG, "handleResult: ");
         try {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Ringtone r = RingtoneManager.getRingtone(getActivity().getApplicationContext(), notification);
             r.play();
         } catch (Exception e) {
+            Log.d(TAG, "handleResult: ", e);
         }
         controller.onBarCodeFound(rawResult.getText());
-    }
-
-    public void showMessageDialog(String message) {
-        DialogFragment fragment = MessageDialogFragment.newInstance("Scan Results", message, this);
-        fragment.show(getActivity().getSupportFragmentManager(), "scan_results");
-    }
-
-    public void closeMessageDialog() {
-        closeDialog("scan_results");
     }
 
     public void closeFormatsDialog() {
@@ -208,8 +203,9 @@ public class BarCodeScannerFragment extends Fragment implements
     public void onPause() {
         Log.d(TAG, "onPause: ");
         super.onPause();
+        mScannerView.setResultHandler(null);
         mScannerView.stopCamera();
-        closeMessageDialog();
+        mScannerView.stopCameraPreview();
         closeFormatsDialog();
     }
 }

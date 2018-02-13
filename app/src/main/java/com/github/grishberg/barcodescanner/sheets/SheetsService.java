@@ -5,11 +5,14 @@ import android.os.AsyncTask;
 
 import com.github.grishberg.barcodescanner.R;
 import com.github.grishberg.barcodescanner.common.AbsServiceObservable;
+import com.github.grishberg.barcodescanner.common.FileUtils;
 import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.form.CellRelation;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -27,9 +30,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import javax.inject.Inject;
 
 /**
- * Created by grishberg on 04.02.18.
+ * Operations with sheets.
  */
-
 public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
     private static final String TAG = SheetsService.class.getSimpleName();
     private final Logger logger;
@@ -63,16 +65,21 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
     private ArrayList<CellRelation> findResults(SheetsColumnRequest request) {
         ArrayList<CellRelation> results = new ArrayList<>();
 
-        InputStream stream = appContext.getResources().openRawResource(R.raw.ean13_sample);
+        WorkbookHolder workbookHolder = new WorkbookHolder();
         try {
-            XSSFWorkbook workbook = new XSSFWorkbook(stream);
-            XSSFSheet sheet = workbook.getSheetAt(0);
+            workbookHolder.stream = new FileInputStream(docFile);
+            workbookHolder.workbook = new XSSFWorkbook(workbookHolder.stream);
+            XSSFSheet sheet = workbookHolder.workbook.getSheetAt(0);
             int rowsCount = sheet.getPhysicalNumberOfRows();
-            FormulaEvaluator formulaEvaluator = workbook.getCreationHelper()
+            FormulaEvaluator formulaEvaluator = workbookHolder.workbook.getCreationHelper()
                     .createFormulaEvaluator();
             logger.d(TAG, "findResults: rowsCount = " + rowsCount);
 
-            int[] searchRows = {2, 3};
+            int[] searchRows = new int[request.getCellRepresentations().size()];
+            for (int i = 0; i < request.getCellRepresentations().size(); i++) {
+                CellRelation relation = request.getCellRepresentations().get(i);
+                searchRows[i] = relation.getX();
+            }
             Row firstRow = sheet.getRow(searchRows[0]);
             int cellsCount = firstRow.getPhysicalNumberOfCells();
             for (int y = 0; y < cellsCount; y++) {
@@ -103,8 +110,9 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
         } catch (Exception e) {
             /* proper exception handling to be here */
             logger.e(TAG, e.toString());
+        } finally {
+            workbookHolder.close();
         }
-
         return results;
     }
 
@@ -114,7 +122,36 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
         }
     }
 
-    private void writeXls() {
+    public void changeItemValue(int x, int y, String newValue) {
+        logger.d(TAG, "changeItemValue() called with: x = [" + x + "], y = [" + y +
+                "], newValue = [" + newValue + "]");
+        writeXls(x, y, newValue);
+    }
+
+    private void writeXls(int x, int y, String value) {
+        // read existing book.
+        WorkbookHolder workbookHolder = new WorkbookHolder();
+        try {
+            workbookHolder.stream = new FileInputStream(docFile);
+            workbookHolder.workbook = new XSSFWorkbook(workbookHolder.stream);
+
+            XSSFSheet sheet = workbookHolder.workbook.getSheetAt(0);
+            Row row = sheet.getRow(y);
+            Cell cell = row.createCell(x);
+            cell.setCellValue(value);
+
+            // write to sheet
+            OutputStream outputStream = new FileOutputStream(docFile);
+            workbookHolder.workbook.write(outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            /* proper exception handling to be here */
+            logger.e(TAG, e.toString());
+        } finally {
+            workbookHolder.close();
+        }
+
         //XXX: Using blank template file as a workaround to make it work
         //Original library contained something like 80K methods and I chopped it to 60k methods
         //so, some classes are missing, and some things not working properly
@@ -144,7 +181,7 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
         }
     }
 
-    protected String getCellAsString(Row row, int c, FormulaEvaluator formulaEvaluator) {
+    private String getCellAsString(Row row, int c, FormulaEvaluator formulaEvaluator) {
         String value = "";
         try {
             Cell cell = row.getCell(c);
@@ -174,5 +211,15 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
             logger.e(TAG, e.toString());
         }
         return value;
+    }
+
+    private static class WorkbookHolder {
+        InputStream stream = null;
+        XSSFWorkbook workbook = null;
+
+        void close() {
+            FileUtils.safeClose(workbook);
+            FileUtils.safeClose(stream);
+        }
     }
 }

@@ -15,6 +15,22 @@
         android:textColor="@color/primary_text"
         android:textSize="24sp"/>
 
+    <!-- Label -->
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+
+        <EditText
+            android:id="@+id/add_relation_cell_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_cell_label"
+            android:inputType="text"
+            android:textSize="@dimen/add_relation_text_size"/>
+
+    </android.support.design.widget.TextInputLayout>
+
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,8 +41,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/enter_cell_address"
-            android:maxLength="11"
             android:inputType="number"
+            android:maxLength="11"
             android:textSize="@dimen/add_relation_text_size"/>
 
     </android.support.design.widget.TextInputLayout>

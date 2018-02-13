@@ -7,6 +7,7 @@ import com.github.grishberg.barcodescanner.form.builder.FormBuilderService;
 import com.github.grishberg.barcodescanner.form.dialog.AddRelationController;
 import com.github.grishberg.barcodescanner.main.MainController;
 import com.github.grishberg.barcodescanner.main.MainScreenService;
+import com.github.grishberg.barcodescanner.sheets.SheetsService;
 
 import javax.inject.Singleton;
 
@@ -17,7 +18,7 @@ import dagger.Component;
  */
 @Singleton
 @Component(modules = {ApplicationModule.class, MainModule.class, BarCodeModule.class,
-        RelationBuilderModule.class, FormModule.class})
+        RelationBuilderModule.class, FormModule.class, DbModule.class})
 public interface AppComponent {
     BarCodeController provideBarCodeController();
 
@@ -28,4 +29,6 @@ public interface AppComponent {
     Logger provideLogger();
 
     MainScreenService provideMainScreenService();
+
+    SheetsService provideSheetsService();
 }

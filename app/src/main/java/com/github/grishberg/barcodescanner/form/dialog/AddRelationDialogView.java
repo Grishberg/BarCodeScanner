@@ -38,6 +38,7 @@ public class AddRelationDialogView extends DialogFragment {
                 R.array.cell_type_array, android.R.layout.simple_spinner_item);
 
         View rootView = inflater.inflate(R.layout.dialog_add_relation, null);
+        final EditText label =rootView.findViewById(R.id.add_relation_cell_label);
         final EditText addressEditText = rootView.findViewById(R.id.add_relation_cell_address);
         final CheckBox readOnly = rootView.findViewById(R.id.cell_readonly_checkbox);
         final Spinner typeSpinner = rootView.findViewById(R.id.cell_type_spinner);
@@ -51,7 +52,8 @@ public class AddRelationDialogView extends DialogFragment {
                             public void onClick(DialogInterface dialog, int id) {
                                 int columnIndex = Integer.valueOf(addressEditText.getText()
                                         .toString());
-                                controller.onPositiveClicked(columnIndex,
+                                controller.onPositiveClicked(label.getText().toString(),
+                                        columnIndex,
                                         readOnly.isChecked(),
                                         typeSpinner.getSelectedItemPosition());
                             }

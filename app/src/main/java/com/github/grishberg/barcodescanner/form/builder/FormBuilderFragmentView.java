@@ -14,7 +14,6 @@ import android.widget.Button;
 import com.github.grishberg.barcodescanner.R;
 import com.github.grishberg.barcodescanner.di.DiManager;
 import com.github.grishberg.barcodescanner.form.CellRelation;
-import com.github.grishberg.barcodescanner.form.FormRelationsAdapter;
 import com.github.grishberg.barcodescanner.form.dialog.AddRelationDialogView;
 
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.List;
  */
 public class FormBuilderFragmentView extends Fragment implements FormBuilderModelListener {
     private RecyclerView recyclerView;
-    private FormRelationsAdapter adapter;
+    private FormBuilderRelationsAdapter adapter;
     private FormBuilderController controller;
     private FormBuilderService service;
 
@@ -49,7 +48,7 @@ public class FormBuilderFragmentView extends Fragment implements FormBuilderMode
         View view = inflater.inflate(R.layout.fragment_form_builder, container, false);
         recyclerView = view.findViewById(R.id.form_builder_relations_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new FormRelationsAdapter();
+        adapter = new FormBuilderRelationsAdapter(getContext());
         recyclerView.setAdapter(adapter);
 
         Button addRelationButton = view.findViewById(R.id.form_builder_add_relation_button);

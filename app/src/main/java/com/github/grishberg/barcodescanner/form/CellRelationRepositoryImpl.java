@@ -1,46 +1,68 @@
 package com.github.grishberg.barcodescanner.form;
 
+import android.os.AsyncTask;
+
 import com.github.grishberg.barcodescanner.common.Logger;
 
-import java.util.ArrayList;
+import org.greenrobot.greendao.query.Query;
+
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by grishberg on 07.02.18.
  */
-
 public class CellRelationRepositoryImpl implements CellRelationRepository {
     private static final String TAG = CellRelationRepositoryImpl.class.getSimpleName();
     private final Logger logger;
-    private String currentFilePath;
-    private final ArrayList<CellRelation> currentRelation = new ArrayList<>();
+    private String currentDocPath;
+    private final CellRelationDao cellRelationDao;
 
-    public CellRelationRepositoryImpl(Logger logger) {
+    @Inject
+    public CellRelationRepositoryImpl(Logger logger, CellRelationDao cellRelationDao) {
         this.logger = logger;
-        currentRelation.add(new CellRelation(FormCellType.STRING, true, 0));
-        currentRelation.add(new CellRelation(FormCellType.NUMBER, true, 4));
+        this.cellRelationDao = cellRelationDao;
     }
 
+    //TODO: add listener field to avoid memory leak.
     @Override
-    public void findRepresentation(String filePath, OnRepresentationLoadedListener listener) {
-        if (listener != null) {
-            listener.onRepresentationLoaded(currentRelation);
-        }
+    public void findRepresentation(final String filePath, final OnRepresentationLoadedListener listener) {
+        new AsyncTask<Void, Void, List<CellRelation>>() {
+            @Override
+            protected List<CellRelation> doInBackground(Void... voids) {
+                Query<CellRelation> query = cellRelationDao
+                        .queryBuilder()
+                        .where(CellRelationDao.Properties.DocPath.eq(filePath))
+                        .build();
+                return query.list();
+            }
+
+            @Override
+            protected void onPostExecute(List<CellRelation> relations) {
+                if (listener != null) {
+                    listener.onRepresentationLoaded(relations);
+                }
+            }
+        }.execute();
     }
 
     @Override
     public void storeRelations(String filePath, List<CellRelation> relations) {
-        currentRelation.clear();
-        currentRelation.addAll(relations);
+        for (CellRelation relation : relations) {
+            relation.setDocPath(currentDocPath);
+            cellRelationDao.insert(relation);
+        }
     }
 
     @Override
     public void setCurrentDocumentName(String filePath) {
-        currentFilePath = filePath;
+        currentDocPath = filePath;
     }
 
     @Override
     public void addRelationForCurrentDoc(CellRelation relation) {
-        currentRelation.add(relation);
+        relation.setDocPath(currentDocPath);
+        cellRelationDao.insert(relation);
     }
 }

@@ -70,9 +70,8 @@ public class FormBuilderService {
         this.listener = null;
     }
 
-    public void addRelation(int cellColumnIndex, boolean readonly, int typeIndex) {
-        FormCellType cellType = FormCellType.values()[typeIndex];
-        CellRelation relation = new CellRelation(cellType, readonly, cellColumnIndex);
+    public void addRelation(String label, int cellColumnIndex, boolean readonly, int cellType) {
+        CellRelation relation = new CellRelation(label, cellType, readonly, cellColumnIndex);
         relationRepository.addRelationForCurrentDoc(relation);
         requestRelations();
     }

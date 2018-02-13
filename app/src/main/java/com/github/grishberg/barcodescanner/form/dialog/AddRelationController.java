@@ -5,7 +5,7 @@ package com.github.grishberg.barcodescanner.form.dialog;
  */
 
 public interface AddRelationController {
-    void onPositiveClicked(int cellColumnIndex, boolean checked, int selectedItemPosition);
+    void onPositiveClicked(String label, int cellColumnIndex, boolean checked, int selectedItemPosition);
 
     void onNegativeClicked();
 

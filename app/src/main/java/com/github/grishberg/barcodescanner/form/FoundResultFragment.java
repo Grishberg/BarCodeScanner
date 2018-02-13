@@ -3,6 +3,7 @@ package com.github.grishberg.barcodescanner.form;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +14,12 @@ import com.github.grishberg.barcodescanner.R;
 import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.common.ValueObserver;
 import com.github.grishberg.barcodescanner.di.DiManager;
-import com.github.grishberg.barcodescanner.main.MainControllerImpl;
+import com.github.grishberg.barcodescanner.form.recycler.FormResultAdapter;
+import com.github.grishberg.barcodescanner.form.recycler.FormResultItemControllerImpl;
+import com.github.grishberg.barcodescanner.form.recycler.ViewHolderFactory;
+import com.github.grishberg.barcodescanner.form.recycler.ViewHolderFactoryImpl;
 import com.github.grishberg.barcodescanner.main.MainScreenService;
+import com.github.grishberg.barcodescanner.sheets.SheetsService;
 
 import java.util.List;
 
@@ -25,9 +30,9 @@ import java.util.List;
 public class FoundResultFragment extends Fragment {
     private static final String TAG = FoundResultFragment.class.getSimpleName();
     private MainScreenService service;
-    private FoundResultController controller;
     private TextView barCodeText;
-    private TextView documentResult;
+    private FormResultAdapter formResultAdapter;
+
     private Logger logger;
 
     private final ValueObserver<String> barCodeObserver = new ValueObserver<String>() {
@@ -41,12 +46,8 @@ public class FoundResultFragment extends Fragment {
     private final ValueObserver<List<CellRelation>> resultObserver = new ValueObserver<List<CellRelation>>() {
         @Override
         public void onValueChanged(List<CellRelation> result) {
-            StringBuilder sb = new StringBuilder();
-            for (CellRelation res : result) {
-                sb.append(res.toString());
-                sb.append("; ");
-            }
-            documentResult.setText(sb.toString());
+            Log.d(TAG, "onValueChanged: ");
+            formResultAdapter.setRelationsWithResult(result);
         }
     };
 
@@ -55,7 +56,7 @@ public class FoundResultFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_form_result, container, false);
         barCodeText = root.findViewById(R.id.form_result_barcode);
-        documentResult = root.findViewById(R.id.form_result_found_value);
+        RecyclerView resultRecyclerView = root.findViewById(R.id.form_result_recycler_view);
         return root;
     }
 
@@ -63,10 +64,13 @@ public class FoundResultFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         logger = DiManager.getAppComponent().provideLogger();
+        SheetsService sheetsService = DiManager.getAppComponent().provideSheetsService();
         service = DiManager.getAppComponent().provideMainScreenService();
-        controller = new FoundResultControllerImpl(this, service, logger);
         service.registerBarcodeObserver(barCodeObserver);
         service.registerResultCellsObserver(resultObserver);
+        FormResultItemController itemController = new FormResultItemControllerImpl(sheetsService);
+        ViewHolderFactory viewHolderFactory = new ViewHolderFactoryImpl(itemController);
+        formResultAdapter = new FormResultAdapter(viewHolderFactory);
     }
 
     @Override

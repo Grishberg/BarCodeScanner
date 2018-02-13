@@ -20,8 +20,8 @@ public class AddRelationControllerImpl implements AddRelationController {
     }
 
     @Override
-    public void onPositiveClicked(int cellColumnIndex, boolean checked, int typeIndex) {
-        service.addRelation(cellColumnIndex, checked, typeIndex);
+    public void onPositiveClicked(String label, int cellColumnIndex, boolean checked, int typeIndex) {
+        service.addRelation(label, cellColumnIndex, checked, typeIndex);
     }
 
     @Override

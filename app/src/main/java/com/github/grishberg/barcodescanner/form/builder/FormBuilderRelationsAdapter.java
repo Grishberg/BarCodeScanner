@@ -1,5 +1,6 @@
-package com.github.grishberg.barcodescanner.form;
+package com.github.grishberg.barcodescanner.form.builder;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.github.grishberg.barcodescanner.R;
+import com.github.grishberg.barcodescanner.form.CellRelation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +19,13 @@ import java.util.List;
  * Created by grishberg on 06.02.18.
  */
 
-public class FormRelationsAdapter extends RecyclerView.Adapter<FormRelationsAdapter.RelationViewHolder> {
+public class FormBuilderRelationsAdapter extends RecyclerView.Adapter<FormBuilderRelationsAdapter.RelationViewHolder> {
 
+    public FormBuilderRelationsAdapter(Context context) {
+        this.context = context;
+    }
+
+    private final Context context;
     @Nullable
     private List<CellRelation> relations;
 
@@ -38,12 +45,18 @@ public class FormRelationsAdapter extends RecyclerView.Adapter<FormRelationsAdap
     public void onBindViewHolder(RelationViewHolder holder, int position) {
         CellRelation cellRelation = relations.get(position);
         holder.cellAddress.setText(String.valueOf(cellRelation.getX()));
-        holder.cellType.setText(cellTypeToString(cellRelation.getCellType()));
+        holder.cellType.setText(cellTypeToString(context, cellRelation.getCellType()));
         holder.readOnly.setChecked(cellRelation.isReadOnly());
+        holder.cellLabel.setText(cellRelation.getLabel());
     }
 
-    private String cellTypeToString(FormCellType cellType) {
-        return cellType.name();
+    private String cellTypeToString(Context context, int cellType) {
+        switch (cellType) {
+            case 0:
+                return context.getString(R.string.cell_type_number);
+            default:
+                return context.getString(R.string.cell_type_string);
+        }
     }
 
     @Override
@@ -52,6 +65,7 @@ public class FormRelationsAdapter extends RecyclerView.Adapter<FormRelationsAdap
     }
 
     static class RelationViewHolder extends RecyclerView.ViewHolder {
+        TextView cellLabel;
         TextView cellAddress;
         TextView cellType;
         CheckBox readOnly;
@@ -59,6 +73,7 @@ public class FormRelationsAdapter extends RecyclerView.Adapter<FormRelationsAdap
 
         public RelationViewHolder(View itemView) {
             super(itemView);
+            cellLabel = itemView.findViewById(R.id.cell_label);
             cellAddress = itemView.findViewById(R.id.cell_address);
             cellType = itemView.findViewById(R.id.cell_type);
             readOnly = itemView.findViewById(R.id.cell_readonly);
