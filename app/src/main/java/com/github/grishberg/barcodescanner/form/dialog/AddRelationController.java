@@ -10,4 +10,6 @@ public interface AddRelationController {
     void onNegativeClicked();
 
     void setView(AddRelationDialogView addRelationDialogView);
+
+    void onTypeChanged(int position);
 }

@@ -1,6 +1,7 @@
 package com.github.grishberg.barcodescanner.di;
 
 import com.github.grishberg.barcodescanner.barcode.BarCodeController;
+import com.github.grishberg.barcodescanner.barcode.ScanService;
 import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.form.builder.FormBuilderController;
 import com.github.grishberg.barcodescanner.form.builder.FormBuilderService;
@@ -20,7 +21,6 @@ import dagger.Component;
 @Component(modules = {ApplicationModule.class, MainModule.class, BarCodeModule.class,
         RelationBuilderModule.class, FormModule.class, DbModule.class})
 public interface AppComponent {
-    BarCodeController provideBarCodeController();
 
     AddRelationController provideAddRelationController();
 
@@ -31,4 +31,6 @@ public interface AppComponent {
     MainScreenService provideMainScreenService();
 
     SheetsService provideSheetsService();
+
+    ScanService provideBarCodeService();
 }

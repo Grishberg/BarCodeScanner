@@ -16,7 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.github.grishberg.barcodescanner.R;
-import com.github.grishberg.barcodescanner.barcode.BarCodeScannerFragment;
+import com.github.grishberg.barcodescanner.barcode.BarCodeScannerView;
 import com.github.grishberg.barcodescanner.di.DiManager;
 import com.github.grishberg.barcodescanner.form.builder.FormBuilderFragmentView;
 import com.github.grishberg.barcodescanner.form.FoundResultFragment;
@@ -134,7 +134,9 @@ public class MainScreenView extends AppCompatActivity implements MainServiceStat
                 // No explanation needed, we can request the permission.
 
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.CAMERA},
+                        new String[]{
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.READ_EXTERNAL_STORAGE},
                         CAMERA_REQUEST_CODE);
 
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
@@ -182,7 +184,7 @@ public class MainScreenView extends AppCompatActivity implements MainServiceStat
         public Fragment getItem(int position) {
             switch (position) {
                 case BARCODE_SCREEN:
-                    return new BarCodeScannerFragment();
+                    return new BarCodeScannerView();
                 case RESULT_SCREEN:
                     return new FoundResultFragment();
             }

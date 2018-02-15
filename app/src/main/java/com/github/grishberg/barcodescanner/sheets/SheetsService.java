@@ -75,25 +75,18 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
                     .createFormulaEvaluator();
             logger.d(TAG, "findResults: rowsCount = " + rowsCount);
 
-            int[] searchRows = new int[request.getCellRepresentations().size()];
-            for (int i = 0; i < request.getCellRepresentations().size(); i++) {
-                CellRelation relation = request.getCellRepresentations().get(i);
-                searchRows[i] = relation.getX();
-            }
-            Row firstRow = sheet.getRow(searchRows[0]);
-            int cellsCount = firstRow.getPhysicalNumberOfCells();
+            ArrayList<Integer> searchRows = provideSearchRows(request);
+
+            int cellsCount = sheet.getPhysicalNumberOfRows();
+
             for (int y = 0; y < cellsCount; y++) {
                 boolean found = false;
                 Row row = sheet.getRow(y);
-                for (int i = 0; i < searchRows.length; i++) {
-                    int x = searchRows[i];
+                for (int i = 0; i < searchRows.size(); i++) {
+                    int x = searchRows.get(i);
                     String value = getCellAsString(row, x, formulaEvaluator);
-                    String cellInfo = "x:" + x + "; y:" + y + "; v:" + value;
-
-                    logger.d(TAG, cellInfo);
                     if (request.getSearchString().equals(value)) {
                         found = true;
-                        logger.d(TAG, "------- found cell in : " + cellInfo);
                         break;
                     }
                 }
@@ -114,6 +107,18 @@ public class SheetsService extends AbsServiceObservable<SheetsServiceListener> {
             workbookHolder.close();
         }
         return results;
+    }
+
+    private ArrayList<Integer> provideSearchRows(SheetsColumnRequest request) {
+        ArrayList<Integer> searchRows = new ArrayList<>();
+
+        for (int i = 0; i < request.getCellRepresentations().size(); i++) {
+            CellRelation relation = request.getCellRepresentations().get(i);
+            if (relation.isSearch()) {
+                searchRows.add(relation.getX());
+            }
+        }
+        return searchRows;
     }
 
     private void notifyResultFound(ArrayList<CellRelation> result) {

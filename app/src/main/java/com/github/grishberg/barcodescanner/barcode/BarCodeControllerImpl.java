@@ -9,11 +9,12 @@ import javax.inject.Inject;
  */
 public class BarCodeControllerImpl implements BarCodeController {
     private static final String TAG = BarCodeControllerImpl.class.getSimpleName();
+    private BarCodeScannerView view;
     private final Logger logger;
     private final ScanService scanService;
 
-    @Inject
-    public BarCodeControllerImpl(Logger logger, ScanService scanService) {
+    public BarCodeControllerImpl(BarCodeScannerView view, Logger logger, ScanService scanService) {
+        this.view = view;
         this.logger = logger;
         this.scanService = scanService;
     }
@@ -31,5 +32,14 @@ public class BarCodeControllerImpl implements BarCodeController {
     @Override
     public void unregisterListener(ScannerServiceListener listener) {
         scanService.unregisterListener(listener);
+    }
+
+    @Override
+    public void onUserVisibleHintChanged(boolean isVisibleToUser) {
+        if (isVisibleToUser) {
+            view.startScanner();
+        } else {
+            view.stopScanner();
+        }
     }
 }

@@ -7,4 +7,6 @@ import com.github.grishberg.barcodescanner.common.ServiceListenerRegistrator;
  */
 public interface BarCodeController extends ServiceListenerRegistrator<ScannerServiceListener> {
     void onBarCodeFound(String code);
+
+    void onUserVisibleHintChanged(boolean isVisibleToUser);
 }

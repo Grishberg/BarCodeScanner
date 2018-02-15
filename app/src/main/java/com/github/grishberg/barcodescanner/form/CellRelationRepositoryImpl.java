@@ -25,6 +25,11 @@ public class CellRelationRepositoryImpl implements CellRelationRepository {
         this.cellRelationDao = cellRelationDao;
     }
 
+    @Override
+    public void setCurrentDocumentName(String filePath) {
+        currentDocPath = filePath;
+    }
+
     //TODO: add listener field to avoid memory leak.
     @Override
     public void findRepresentation(final String filePath, final OnRepresentationLoadedListener listener) {
@@ -56,13 +61,9 @@ public class CellRelationRepositoryImpl implements CellRelationRepository {
     }
 
     @Override
-    public void setCurrentDocumentName(String filePath) {
-        currentDocPath = filePath;
-    }
-
-    @Override
     public void addRelationForCurrentDoc(CellRelation relation) {
         relation.setDocPath(currentDocPath);
         cellRelationDao.insert(relation);
+        logger.d(TAG, "Inserted new relation, ID: " + relation.getId());
     }
 }

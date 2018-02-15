@@ -28,7 +28,7 @@ public class ViewHolderReadonlyValue extends FormResultViewHolder {
 
     static FormResultViewHolder getInstance(ViewGroup parent) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_relation, parent, false);
+                .inflate(R.layout.item_form_result_readonly, parent, false);
         return new ViewHolderReadonlyValue(v);
     }
 }

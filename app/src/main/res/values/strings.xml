@@ -22,10 +22,13 @@
 
     <string name="cell_type_string">String</string>
     <string name="cell_type_number">Number</string>
+    <string name="cell_type_search">Search column</string>
     <string name="enter_cell_label">Enter cell label</string>
+    <string name="open_document">Open XLS file</string>
 
     <string-array name="cell_type_array">
         <item>@string/cell_type_number</item>
         <item>@string/cell_type_string</item>
+        <item>@string/cell_type_search</item>
     </string-array>
 </resources>

@@ -53,6 +53,7 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
             return;
         }
         sheetsService.setDocFileName(lastDoc);
+        cellRelationStorage.setCurrentDocumentName(lastDoc);
         checkForRelationsAndOpenNextScreen(lastDoc);
     }
 
@@ -62,11 +63,22 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
         }
     }
 
-    public void processBarCode(String code) {
+    public void processBarCode(final String code) {
         logger.d(TAG, "processBarCode: " + code);
         barCode.changeValue(code);
-        sheetsService.findSheetsCell(new SheetsColumnRequest(code, cellsRelations));
+        cellRelationStorage.findRepresentation(lastDocumentProvider.getLastDocument(), new CellRelationRepository.OnRepresentationLoadedListener() {
+            @Override
+            public void onRepresentationLoaded(List<CellRelation> representations) {
+                sheetsService.findSheetsCell(new SheetsColumnRequest(code, representations));
+            }
+
+            @Override
+            public void onRepresentationNotFound() {
+                logger.e(TAG, "processBarCode: onRepresentationNotFound");
+            }
+        });
         notifyShowResultScreen();
+        resultCells.changeValue(new ArrayList<CellRelation>());
     }
 
     private void notifyShowResultScreen() {
@@ -78,6 +90,7 @@ public class MainScreenService extends AbsServiceObservable<MainServiceStateChan
     public void openExcelDocument(String path) {
         sheetsService.setDocFileName(path);
         lastDocumentProvider.updateLastDocument(path);
+        cellRelationStorage.setCurrentDocumentName(path);
 
         checkForRelationsAndOpenNextScreen(path);
     }

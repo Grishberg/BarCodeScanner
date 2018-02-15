@@ -25,7 +25,7 @@ public class ViewHolderNumericValue extends FormResultViewHolder {
 
     static FormResultViewHolder getInstance(ViewGroup parent, FormResultItemController controller) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_relation, parent, false);
+                .inflate(R.layout.item_form_result_numeric, parent, false);
         return new ViewHolderNumericValue(v, controller);
     }
 

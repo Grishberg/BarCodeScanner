@@ -5,7 +5,7 @@
               android:orientation="vertical"
               android:padding="20dp"
     >
-
+    <!-- Title -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,6 +31,7 @@
 
     </android.support.design.widget.TextInputLayout>
 
+    <!-- Cell address -->
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -47,12 +48,14 @@
 
     </android.support.design.widget.TextInputLayout>
 
+    <!-- Cell type -->
     <Spinner
         android:id="@+id/cell_type_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </Spinner>
 
+    <!-- readonly -->
     <CheckBox
         android:id="@+id/cell_readonly_checkbox"
         android:layout_width="match_parent"

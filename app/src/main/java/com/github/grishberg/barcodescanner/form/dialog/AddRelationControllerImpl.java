@@ -7,6 +7,7 @@ import com.github.grishberg.barcodescanner.form.builder.FormBuilderService;
  */
 
 public class AddRelationControllerImpl implements AddRelationController {
+    public static final int TYPE_SEARCH_POSITION = 2;
     private final FormBuilderService service;
     private AddRelationDialogView view;
 
@@ -20,12 +21,24 @@ public class AddRelationControllerImpl implements AddRelationController {
     }
 
     @Override
-    public void onPositiveClicked(String label, int cellColumnIndex, boolean checked, int typeIndex) {
+    public void onPositiveClicked(String label,
+                                  int cellColumnIndex,
+                                  boolean checked,
+                                  int typeIndex) {
         service.addRelation(label, cellColumnIndex, checked, typeIndex);
     }
 
     @Override
     public void onNegativeClicked() {
         view.dismissDialog();
+    }
+
+    @Override
+    public void onTypeChanged(int position) {
+        if(position == TYPE_SEARCH_POSITION) {
+            view.enableSearchMode();
+        } else {
+            view.enableViewDataMode();
+        }
     }
 }

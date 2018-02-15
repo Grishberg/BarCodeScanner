@@ -3,11 +3,13 @@ package com.github.grishberg.barcodescanner.form;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.grishberg.barcodescanner.R;
@@ -32,6 +34,7 @@ public class FoundResultFragment extends Fragment {
     private MainScreenService service;
     private TextView barCodeText;
     private FormResultAdapter formResultAdapter;
+    private FormResultController formResultController;
 
     private Logger logger;
 
@@ -57,6 +60,15 @@ public class FoundResultFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_form_result, container, false);
         barCodeText = root.findViewById(R.id.form_result_barcode);
         RecyclerView resultRecyclerView = root.findViewById(R.id.form_result_recycler_view);
+        resultRecyclerView.setAdapter(formResultAdapter);
+        resultRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        Button openDocButton = root.findViewById(R.id.form_result_open_document_btn);
+        openDocButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                formResultController.onOpenButtonClicked();
+            }
+        });
         return root;
     }
 
@@ -65,12 +77,13 @@ public class FoundResultFragment extends Fragment {
         super.onCreate(savedInstanceState);
         logger = DiManager.getAppComponent().provideLogger();
         SheetsService sheetsService = DiManager.getAppComponent().provideSheetsService();
-        service = DiManager.getAppComponent().provideMainScreenService();
-        service.registerBarcodeObserver(barCodeObserver);
-        service.registerResultCellsObserver(resultObserver);
+        this.service = DiManager.getAppComponent().provideMainScreenService();
+        this.service.registerBarcodeObserver(barCodeObserver);
+        this.service.registerResultCellsObserver(resultObserver);
         FormResultItemController itemController = new FormResultItemControllerImpl(sheetsService);
         ViewHolderFactory viewHolderFactory = new ViewHolderFactoryImpl(itemController);
         formResultAdapter = new FormResultAdapter(viewHolderFactory);
+        formResultController = new FormResultControllerImpl(service);
     }
 
     @Override

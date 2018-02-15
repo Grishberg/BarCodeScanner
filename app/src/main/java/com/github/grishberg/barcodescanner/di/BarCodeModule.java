@@ -1,7 +1,5 @@
 package com.github.grishberg.barcodescanner.di;
 
-import com.github.grishberg.barcodescanner.barcode.BarCodeController;
-import com.github.grishberg.barcodescanner.barcode.BarCodeControllerImpl;
 import com.github.grishberg.barcodescanner.barcode.ScanService;
 import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.main.MainScreenService;
@@ -21,10 +19,5 @@ public class BarCodeModule {
     @Provides
     ScanService provideScanService(Logger logger, MainScreenService mainScreenService) {
         return new ScanService(logger, mainScreenService);
-    }
-
-    @Provides
-    public BarCodeController provideBarCodeController(Logger logger, ScanService scanService) {
-        return new BarCodeControllerImpl(logger, scanService);
     }
 }

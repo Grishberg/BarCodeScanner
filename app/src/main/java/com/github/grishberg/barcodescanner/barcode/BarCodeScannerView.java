@@ -17,8 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.grishberg.barcodescanner.R;
+import com.github.grishberg.barcodescanner.common.Logger;
 import com.github.grishberg.barcodescanner.di.DiManager;
-import com.github.grishberg.barcodescanner.main.MainController;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
@@ -30,11 +30,11 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 /**
  * Created by grishberg on 06.02.18.
  */
-public class BarCodeScannerFragment extends Fragment implements
+public class BarCodeScannerView extends Fragment implements
         MessageDialogFragment.MessageDialogListener,
         ZXingScannerView.ResultHandler,
         FormatSelectorDialogFragment.FormatSelectorDialogListener {
-    private static final String TAG = BarCodeScannerFragment.class.getSimpleName();
+    private static final String TAG = BarCodeScannerView.class.getSimpleName();
     private static final String FLASH_STATE = "FLASH_STATE";
     private static final String AUTO_FOCUS_STATE = "AUTO_FOCUS_STATE";
     private static final String SELECTED_FORMATS = "SELECTED_FORMATS";
@@ -45,6 +45,7 @@ public class BarCodeScannerFragment extends Fragment implements
     private ArrayList<Integer> mSelectedIndices;
     private int mCameraId = -1;
     private BarCodeController controller;
+    private boolean scannerStarted;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
@@ -69,7 +70,9 @@ public class BarCodeScannerFragment extends Fragment implements
         Log.d(TAG, "onCreate: ");
         super.onCreate(state);
         setHasOptionsMenu(true);
-        controller = DiManager.getAppComponent().provideBarCodeController();
+        Logger logger = DiManager.getAppComponent().provideLogger();
+        ScanService scanService = DiManager.getAppComponent().provideBarCodeService();
+        controller = new BarCodeControllerImpl(this, logger, scanService);
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -124,16 +127,6 @@ public class BarCodeScannerFragment extends Fragment implements
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(TAG, "onResume: ");
-        super.onResume();
-        mScannerView.setResultHandler(this);
-        mScannerView.startCamera(mCameraId);
-        mScannerView.setFlash(mFlash);
-        mScannerView.setAutoFocus(mAutoFocus);
     }
 
     @Override
@@ -200,12 +193,47 @@ public class BarCodeScannerFragment extends Fragment implements
     }
 
     @Override
+    public void onResume() {
+        Log.d(TAG, "onResume: ");
+        super.onResume();
+        startScanner();
+    }
+
+    void startScanner() {
+        if (scannerStarted || mScannerView == null) {
+            return;
+        }
+        mScannerView.setResultHandler(this);
+        mScannerView.startCamera(mCameraId);
+        mScannerView.setFlash(mFlash);
+        mScannerView.setAutoFocus(mAutoFocus);
+        scannerStarted = true;
+    }
+
+    @Override
     public void onPause() {
         Log.d(TAG, "onPause: ");
         super.onPause();
+        stopScanner();
+        closeFormatsDialog();
+    }
+
+    void stopScanner() {
+        if (!scannerStarted || mScannerView == null) {
+            return;
+        }
         mScannerView.setResultHandler(null);
         mScannerView.stopCamera();
         mScannerView.stopCameraPreview();
-        closeFormatsDialog();
+        scannerStarted = false;
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        Log.d(TAG, "setUserVisibleHint: " + isVisibleToUser);
+        if (controller != null) {
+            controller.onUserVisibleHintChanged(isVisibleToUser);
+        }
     }
 }

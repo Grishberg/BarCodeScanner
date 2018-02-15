@@ -14,6 +14,7 @@ import org.greenrobot.greendao.annotation.Generated;
 public class CellRelation {
     public static final int CELL_TYPE_STRING = 0;
     public static final int CELL_TYPE_NUMBER = 1;
+    public static final int CELL_TYPE_SEARCH = 2;
 
     @Id
     private Long id;
@@ -46,7 +47,7 @@ public class CellRelation {
 
     @Generated(hash = 769196090)
     public CellRelation(Long id, String docPath, int cellType, boolean readOnly, int x,
-            String value, String label) {
+                        String value, String label) {
         this.id = id;
         this.docPath = docPath;
         this.cellType = cellType;
@@ -128,5 +129,9 @@ public class CellRelation {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public boolean isSearch() {
+        return cellType == CELL_TYPE_SEARCH;
     }
 }
