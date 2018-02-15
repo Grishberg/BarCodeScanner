@@ -71,7 +71,7 @@ public class FormBuilderService {
     }
 
     public void addRelation(String label, int cellColumnIndex, boolean readonly, int cellType) {
-        CellRelation relation = new CellRelation(label, cellType, readonly, cellColumnIndex);
+        CellRelation relation = new CellRelation(label, cellType, readonly, cellColumnIndex - 1);
         relationRepository.addRelationForCurrentDoc(relation);
         requestRelations();
     }

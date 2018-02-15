@@ -44,7 +44,7 @@ public class FormBuilderRelationsAdapter extends RecyclerView.Adapter<FormBuilde
     @Override
     public void onBindViewHolder(RelationViewHolder holder, int position) {
         CellRelation cellRelation = relations.get(position);
-        holder.cellAddress.setText(String.valueOf(cellRelation.getX()));
+        holder.cellAddress.setText(String.valueOf(cellRelation.getX() + 1));
         holder.cellType.setText(cellTypeToString(context, cellRelation.getCellType()));
         holder.readOnly.setChecked(cellRelation.isReadOnly());
         holder.cellLabel.setText(cellRelation.getLabel());
